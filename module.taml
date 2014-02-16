@@ -1,0 +1,6 @@
+<ModuleDefinition
+   ModuleId="Tasman"
+   VersionId="1"
+   ScriptFile="main.cs"
+   CreateFunction="create"
+   DestroyFunction="destroy" />
