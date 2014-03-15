@@ -51,6 +51,7 @@ function Tasman::runAll(%this) {
 
       for(%i = 0; %i < %methods.count(); %i++) {
          %method = %methods.getKey(%i);
+         %suite.expectationNumber = 0;
 
          // We only want methods unique to this tester, so we compare against an
          // instance of the SomethingShould base class.
@@ -126,14 +127,19 @@ function Expectation::toBeDefined(%this) {
 
 function Expectation::toBe(%this, %target) {
    %messagePart = %this.inverted ? "not to be" : "to be";
-   %this._test(%this.value == %target, "expected" SPC %this.value SPC %messagePart SPC %target);
+   %this._test(%this.value $= %target, "expected" SPC %this.value SPC %messagePart SPC %target);
    return %this;
 }
 
 function Expectation::toEqual(%this, %target) {
    %messagePart = %this.inverted ? "not to equal" : "to equal";
-   %this._test(%this.value $= %target, "expected" SPC %this.value SPC %messagePart SPC %target);
+   %this._test(%this.value == %target, "expected" SPC %this.value SPC %messagePart SPC %target);
    return %this;
+}
+
+function Expectation::toHold(%this) {
+   %messagePart = %this.inverted ? "false" : "true";
+   %this._test(%this.value == true, "expected" SPC %this.value SPC "to be" SPC %messagePart);
 }
 
 function Expectation::toBeAVector(%this, %dim) {
@@ -186,12 +192,13 @@ function Expectation::record(%this) { return %this.lines(); }
 function Expectation::_test(%this, %pred, %failMessage) {
    %pass = %this.inverted ? !%pred : %pred;
    %this.suite.count++;
+   %this.suite.expectationNumber++;
    if(%pass) {
       %this.suite.passes++;
    } else {
       %this.suite.fails++;
       %niceMethod = strreplace(%this.suite._currentMethod, "_", " ");
-      error(%this.suite.subject SPC "should" SPC %niceMethod @ ":" SPC %failMessage);
+      error(%this.suite.subject SPC "should" SPC %niceMethod SPC "[" @ %this.suite.expectationNumber @ "]:" SPC %failMessage);
    }
    return %this;
 }
